@@ -23,6 +23,28 @@ userRouter.get('/find',async(req,res)=>{
         res.status(500).send(`Error getting user data: ${error.message}`)
     }
 })
+//////////////Get user stats/////////////////
+userRouter.get('/stats',async(req,res)=>{
+    const date = new Date()
+    const lastYear = new Date(date.setFullYear(date.getFullYear()-1))
+    try {
+        const data = await UserModel.aggregate([
+            {$match:{createdAt:{$gte:lastYear}}},
+            {$project:{
+                month:{$month:"$createdAt"}
+            }},
+            {
+                $group:{
+                    _id:'$month',
+                    total:{$sum:1}
+                }
+            }
+        ])
+                    res.status(201).json(data)
+    } catch (error) {
+        res.status(500).send(`Error: ${error.message}`)
+    }
+})
 //////////////Register/////////////////
 userRouter.post('/register',async(req,res)=>{
     const {username,password,email} = req.body
@@ -75,8 +97,8 @@ userRouter.post('/login',async(req,res)=>{
 userRouter.patch('/edit/:id',async(req,res)=>{
     const ID = req.params.id
     try {
-        await UserModel.findByIdAndUpdate({_id:ID},req.body)
-        res.status(201).json('Updated successfully')
+        let updated = await UserModel.findByIdAndUpdate({_id:ID},req.body,{ new: true })
+        res.status(201).json(updated)
     } catch (error) {
         res.status(500).send(`Error updating user: ${error.message}`) 
     }
