@@ -7,6 +7,10 @@ const { userRouter } = require('./Routes/User.routes');
 const { productRouter } = require('./Routes/product.routes');
 const { cartRouter } = require('./Routes/cart.routes');
 const { orderRouter } = require('./Routes/order.routes');
+const bodyParser = require('body-parser');
+app.use(bodyParser.json({ limit: '50mb' }));
+app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
+
 const PORT  = process.env.PORT
 
 app.use(cors())

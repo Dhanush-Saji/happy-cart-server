@@ -1,6 +1,7 @@
 const express = require('express');
 const {UserModel } = require('../Model/User/User.model');
 const bcrypt = require('bcrypt');
+const { cloudinary } = require('../utils/cloudinary');
 const userRouter = express.Router()
 
 //////////////Get single user/////////////////
@@ -47,12 +48,12 @@ userRouter.get('/stats',async(req,res)=>{
 })
 //////////////Register/////////////////
 userRouter.post('/register',async(req,res)=>{
-    const {username,password,email} = req.body
+    const {name,password,email,avatar,isAdmin} = req.body
   const saltRounds = 5;
     try {
-        const existingUser = await UserModel.findOne({ username });
+        const existingUser = await UserModel.findOne({ email });
     if (existingUser) {
-      res.status(400).json({ error: 'Username already exists' });
+      res.status(400).json({ error: 'Email already exists' });
       return;
     }
       bcrypt.hash(password,saltRounds,async(err,hash_pass)=>{
@@ -60,7 +61,13 @@ userRouter.post('/register',async(req,res)=>{
           res.status(500).send(err)
         }
         else{
-          const user = new UserModel({username,password:hash_pass,email})
+            let uploadRes
+            if(avatar){
+                 uploadRes = await cloudinary.uploader.upload(avatar,{
+                    upload_preset:'happyCartUserAvatar'
+                })
+            }
+          const user = uploadRes? new UserModel({name,password:hash_pass,email,avatar:uploadRes,isAdmin}):new UserModel({name,password:hash_pass,email,isAdmin})
           const data = await user.save()
           let {password,...others} = data._doc
           res.status(201).json(others)
@@ -72,9 +79,9 @@ userRouter.post('/register',async(req,res)=>{
 })
 //////////////Login/////////////////
 userRouter.post('/login',async(req,res)=>{
-    let {username,password} = req.body;
+    let {email,password} = req.body;
     try {
-        const user = await UserModel.findOne({username})
+        const user = await UserModel.findOne({email})
         if(user){
             bcrypt.compare(password,user.password,(err,result)=>{
                 if(result){
