@@ -4,8 +4,8 @@ const CartSchema = new mongoose.Schema({
     userId:{type:String,required:true},
     products:[
         {
-            productId:{types:String},
-            qunatity:{types:Number,default:1},
+            productId:{type:mongoose.Schema.Types.ObjectId,ref:'product'},
+            quality:{type:Number,default:1},
         }
     ]
 },{
