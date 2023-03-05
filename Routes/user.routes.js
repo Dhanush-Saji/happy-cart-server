@@ -64,8 +64,11 @@ userRouter.post('/register',async(req,res)=>{
             let uploadRes
             if(avatar){
                  uploadRes = await cloudinary.uploader.upload(avatar,{
-                    upload_preset:'happyCartUserAvatar'
+                    folder:isAdmin?'admin_avatar':'user_avatar'
                 })
+                if(!uploadRes){
+                    res.status(500).send(`Image uploading went wrong`)
+                }
             }
           const user = uploadRes? new UserModel({name,password:hash_pass,email,avatar:uploadRes,isAdmin}):new UserModel({name,password:hash_pass,email,isAdmin})
           const data = await user.save()
@@ -89,12 +92,12 @@ userRouter.post('/login',async(req,res)=>{
                     res.status(201).json(others)
                 }
                 else{
-                    res.status(500).send('Invalid Credentials')
+                    res.status(401).send('Invalid Credentials')
                 }
             })
         }
         else{
-            res.status(500).send('User not found')
+            res.status(404).send('User not found')
         }
     } catch (error) {
         res.status(500).send(`Error login user: ${error.message}`)
