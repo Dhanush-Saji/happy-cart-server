@@ -1,15 +1,32 @@
 const express = require('express');
 const { ProductModel } = require('../Model/Product/Product.model');
+const { cloudinary } = require('../utils/cloudinary');
 const productRouter = express.Router()
 
 productRouter.get('/',(req,res)=>{
+    
     res.status(200).send(`You are in product`)
 })
 
 //////////////Add product/////////////////
 productRouter.post('/',async(req,res)=>{
+    const {title,image} = req.body
     try {
-        const newProduct = new ProductModel(req.body)
+        const existingProduct = await ProductModel.findOne({ title });
+        if (existingProduct) {
+          res.status(400).json({ error: 'Product already exists' });
+          return;
+        }
+        let uploadRes
+            if(image){
+                 uploadRes = await cloudinary.uploader.upload(image,{
+                    folder:'Product_images'
+                })
+                if(!uploadRes){
+                    res.status(500).send(`Image uploading went wrong`)
+                }
+            }
+        const newProduct = new ProductModel({...req.body,image:uploadRes})
         const data = await newProduct.save()
         res.status(200).send(data)
         
