@@ -56,25 +56,40 @@ productRouter.delete('/delete/:id',async(req,res)=>{
         res.status(500).send(`Error deleting products: ${error.message}`) 
     }
 })
-
+//////////////Get popular products/////////////////
+productRouter.get('/popular',async(req,res)=>{
+    try {
+        const product = await ProductModel.aggregate([{$sample:{size:4}}])
+        res.status(201).json(product)
+    } catch (error) {
+        res.status(500).send(`Error getting products data: ${error.message}`)
+    }
+})
 //////////////Get all products/////////////////
 productRouter.get('/find',async(req,res)=>{
-    const qnew = req.query.new
-    const qcategory = req.query.category
+    var query={}
     try {
-        if(qnew){
-            const product = await ProductModel.find({}).sort({createdAt:-1}).limit(5)
-            res.status(201).json(product)
-        }else if(qcategory){
-            const product = await ProductModel.find({
-                category:{
-                    $in:[qcategory]
-                }})
-            res.status(201).json(product)
-        }else{
-            const product = await ProductModel.find({})
-            res.status(201).json(product)
+        if(req.query.category){
+            req.query.category.indexOf('headphones') != -1?req.query.category[req.query.category.indexOf('headphones')] = '6404aee53a8c745b2ebc3506':null
+            req.query.category.indexOf('speaker') != -1?req.query.category[req.query.category.indexOf('speaker')] = '6404af323a8c745b2ebc3509':null
+            req.query.category.indexOf('smart_watches') != -1?req.query.category[req.query.category.indexOf('smart_watches')] = '6404e9c1c536cacf42544afa':null
+            req.query.category.indexOf('wireless_earbuds') != -1?req.query.category[req.query.category.indexOf('wireless_earbuds')] = '6405077cc536cacf42545431':null
+            query.category={$in:req.query.category}
         }
+        if(req.query.price){
+            const price = req.query.price
+            query['$and'] = price.map((item)=>{
+                let [min,max] = item.split('-')
+                return min && max
+        ? { price: { $gte: min, $lte: max } }
+        : { price: { $gte: min } };
+            })
+        }
+            const product = await ProductModel.find(query)
+            if(!product){
+                return res.status(404).send({message: "No products found"})
+            }
+            res.status(201).json(product)
     } catch (error) {
         res.status(500).send(`Error getting products data: ${error.message}`)
     }
@@ -84,8 +99,18 @@ productRouter.get('/find',async(req,res)=>{
 productRouter.get('/find/:id',async(req,res)=>{
     
     try {
-        const product = await ProductModel.findById(req.params.id)
+        const product = await ProductModel.findById(req.params.id).populate('category')
                     res.status(201).json(product)
+    } catch (error) {
+        res.status(500).send(`Error getting products data: ${error.message}`)
+    }
+})
+
+//////////////Get product by Category/////////////////
+productRouter.get('/findbycat/:id',async(req,res)=>{
+    try {
+        const products = await ProductModel.find({category:req.params.id})
+        res.status(201).json(products)
     } catch (error) {
         res.status(500).send(`Error getting products data: ${error.message}`)
     }
