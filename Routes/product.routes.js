@@ -69,6 +69,10 @@ productRouter.get('/popular',async(req,res)=>{
 productRouter.get('/find',async(req,res)=>{
     var query={}
     try {
+        if(req.query.title){
+            const regex = new RegExp(req.query.title, 'i');
+            query.title = regex
+        }
         if(req.query.category){
             req.query.category.indexOf('headphones') != -1?req.query.category[req.query.category.indexOf('headphones')] = '6404aee53a8c745b2ebc3506':null
             req.query.category.indexOf('speaker') != -1?req.query.category[req.query.category.indexOf('speaker')] = '6404af323a8c745b2ebc3509':null
