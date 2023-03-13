@@ -126,8 +126,8 @@ stripeRouter.post('/webhook', express.raw({type: 'application/json'}), async(req
   } else {
     // Webhook signing is recommended, but if the secret is not configured in `config.js`,
     // retrieve the event data directly from the request body.
-    data = req.body.data.object;
-    eventType = req.body.type;
+    data = event.data.object;
+    eventType = event.type;
   }
   let payment
   // Handle the event
@@ -145,9 +145,33 @@ stripeRouter.post('/webhook', express.raw({type: 'application/json'}), async(req
       })
       .catch((err) => console.log(err.message));
   }
+  if (event.type == 'payment_intent.payment_failed') {
+
+    // Get the object affected
+    const paymentIntent = event.data.object;
+
+    // Use stored information to get an error object
+    const error = paymentIntent.error;
+
+    // Use its type to choose a response
+    switch (error.type) {
+      case 'StripeCardError':
+        console.log(`A payment error occurred: ${error.message}`);
+        break;
+      case 'StripeInvalidRequestError':
+        console.log('An invalid request occurred.');
+        if (error.param) {
+          console.log(`The parameter ${error.param} is invalid or missing.`);
+        }
+        break;
+      default:
+        console.log('Another problem occurred, maybe unrelated to Stripe.');
+        break;
+    }
+  }
 
   // Return a 200 response to acknowledge receipt of the event
-  res.send({'payment':payment}).end();
+  res.send()
 });
 
   module.exports ={
