@@ -17,12 +17,8 @@ app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
 
 const PORT  = process.env.PORT
 
-app.use(express.json({
-    limit: '5mb',
-    verify: (req, res, buf) => {
-      req.rawBody = buf.toString();
-    }
-}))
+app.use('/stripe',stripeRouter)
+app.use(express.json())
 
 app.get('/',(req,res)=>{
     res.status(200).send('Welcome homepage')
@@ -32,7 +28,6 @@ app.use('/product',productRouter)
 app.use('/cart',cartRouter)
 app.use('/orders',orderRouter)
 app.use('/category',categoryRouter)
-app.use('/stripe',stripeRouter)
 
 
 app.listen(PORT,async()=>{
