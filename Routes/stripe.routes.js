@@ -98,7 +98,7 @@ stripeRouter.post('/create-checkout-session', async (req, res) => {
 // This is your Stripe CLI webhook secret for testing your endpoint locally.
 const webhookSecret = process.env.STRIPE_WEB_HOOK;
 
-stripeRouter.post('/webhook', express.raw({type: 'application/json', verify: false}), async(req, res) => {
+stripeRouter.post('/webhook', express.raw({type: 'application/json'}), async(req, res) => {
   let event;
   if (webhookSecret) {
     // Retrieve the event by verifying the signature using the raw body and secret.
@@ -126,6 +126,7 @@ stripeRouter.post('/webhook', express.raw({type: 'application/json', verify: fal
   let payment
   // Handle the event
   if (eventType === "checkout.session.completed") {
+    console.log('hi checkout session working')
     stripe.customers
       .retrieve(data.customer)
       .then(async (customer) => {

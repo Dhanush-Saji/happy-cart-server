@@ -3,6 +3,7 @@ const { connection} = require('./mongoDB/connect');
 const app = express()
 const dotenv = require('dotenv').config()
 const cors = require('cors');
+app.use(cors())
 const { productRouter } = require('./Routes/product.routes');
 const { cartRouter } = require('./Routes/cart.routes');
 const { orderRouter } = require('./Routes/order.routes');
@@ -16,7 +17,6 @@ app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
 
 const PORT  = process.env.PORT
 
-app.use(cors())
 app.use(express.json())
 
 app.get('/',(req,res)=>{
