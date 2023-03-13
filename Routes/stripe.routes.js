@@ -113,7 +113,8 @@ stripeRouter.post('/webhooks', express.raw({type: 'application/json'}), async(re
   
       try {
         event = stripe.webhooks.constructEvent(
-          req.body,
+          // req.body,
+          req.rawBody,
           signature,
           webhookSecret
         );

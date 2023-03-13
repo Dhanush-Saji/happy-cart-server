@@ -11,7 +11,7 @@ const bodyParser = require('body-parser');
 const { categoryRouter } = require('./Routes/category.routes');
 const { stripeRouter } = require('./Routes/stripe.routes');
 const {userRouter} = require('./Routes/user.routes')
-app.use('/stripe/webhook',bodyParser.raw({ type: '*/*' }));
+// app.use('/stripe/webhooks',bodyParser.raw({ type: '*/*' }));
 app.use(bodyParser.json({ limit: '50mb' }));
 app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
 
