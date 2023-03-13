@@ -132,14 +132,12 @@ stripeRouter.post('/webhook', express.raw({type: 'application/json'}), async(req
   let payment
   // Handle the event
   if (eventType === "checkout.session.completed") {
-    res.send('haii')
     stripe.customers
       .retrieve(data.customer)
       .then(async (customer) => {
         try {
           // CREATE ORDER
-          res.send('haii')
-          // createOrder(customer, data);
+          createOrder(customer, data);
         } catch (err) {
           console.log(typeof createOrder);
           console.log(err);
