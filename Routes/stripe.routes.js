@@ -132,7 +132,13 @@ stripeRouter.post('/webhook', express.raw({type: 'application/json'}), async(req
   let payment
   // Handle the event
   if (eventType === "checkout.session.completed") {
-    res.status(200).send({msg:'success'})
+    try {
+      
+      res.status(200).send({msg:'success'})
+    } catch (error) {
+      res.status(400).send({msg:'error'})
+      
+    }
     // stripe.customers
     //   .retrieve(data.customer)
     //   .then(async (customer) => {
