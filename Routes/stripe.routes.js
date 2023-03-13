@@ -137,10 +137,20 @@ stripeRouter.post('/webhooks', express.raw({type: 'application/json'}), async(re
     // Handle the event
     if (eventType === "checkout.session.completed") {
       try {
-        
-        res.status(200).send({msg:'success'})
+        stripe.customers.retrieve(data.customer).then(async (customer) =>{
+          try {
+                      // CREATE ORDER
+                      createOrder(customer, data);
+                    } catch (err) {
+                      console.log(typeof createOrder);
+                      console.log(err);
+                      res.status(400).send({'err1':err})
+                    }
+        }).catch((err)=>{
+          res.status(400).send({'err2':err})
+        })
       } catch (error) {
-        res.status(400).send({msg:error})
+        res.status(400).send({'err3':err})
       }
     }
     
