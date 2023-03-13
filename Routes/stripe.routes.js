@@ -110,12 +110,13 @@ stripeRouter.post('/webhooks', express.raw({type: 'application/json'}), async(re
     if (webhookSecret) {
       // Retrieve the event by verifying the signature using the raw body and secret.
       let signature = req.headers["stripe-signature"];
-  
+
+      const stripePayload = req.rawBody || req.body;
       try {
         event = stripe.webhooks.constructEvent(
           // req.body,
-          req.rawBody,
-          signature,
+          stripePayload,
+          signature?.toString(),
           webhookSecret
         );
       } catch (err) {
