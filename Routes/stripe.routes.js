@@ -126,8 +126,8 @@ stripeRouter.post('/webhook', express.raw({type: 'application/json'}), async(req
   } else {
     // Webhook signing is recommended, but if the secret is not configured in `config.js`,
     // retrieve the event data directly from the request body.
-    data = event.data.object;
-    eventType = event.type;
+    data = req.body.data.object;
+      eventType = req.body.type;
   }
   let payment
   // Handle the event
