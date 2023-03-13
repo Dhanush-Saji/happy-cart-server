@@ -2,15 +2,16 @@ const mongoose = require('mongoose');
 
 const OrderSchema = new mongoose.Schema({
     userId:{type:String,required:true},
-    products:[
-        {
-            productId:{type:mongoose.Schema.Types.ObjectId,ref:'product'},
-            quantity:{type:Number,default:1},
-        }
-    ],
-    amount:{type:Number,required:true},
-    address:{type:Object,required:true},
-    status:{type:String,default:'Pending'},
+    customerId:{type:String},
+    paymentIntentId:{type:String},
+    products:{type:Array},
+    subtotal:{type:Number,required:true},
+    total:{type:Number,required:true},
+    shipping:{type:Object,required:true},
+    delivery_status:{type:String,default:'pending'},
+    transaction_status:{type:String,default:'null'},
+    payment_status:{type:String,required:true},
+    shipping_cost:{type:String},
 },{
     timestamps:true
 })

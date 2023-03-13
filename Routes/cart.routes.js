@@ -7,11 +7,16 @@ cartRouter.get('/',(req,res)=>{
 })
 
 //////////////Add cart/////////////////
-cartRouter.post('/',async(req,res)=>{
+cartRouter.post('/:userId',async(req,res)=>{
     try {
-        const newProduct = new CartModel(req.body)
-        const data = await newProduct.save()
-        res.status(200).send(data)
+        const existingUser = await CartModel.findOne(req.params.userId);
+        if (!existingUser) {
+            const newProduct = new CartModel(req.body)
+            const data = await newProduct.save()
+            res.status(200).send(data)
+        }
+        let updated = await CartModel.findByIdAndUpdate(req.params.userId,req.body,{ new: true })
+        res.status(201).json(updated)
         
     } catch (error) {
         res.status(500).send(`Error creating products: ${error.message}`)

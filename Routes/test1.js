@@ -6,14 +6,7 @@ const stripeRouter = express.Router()
 stripeRouter.post('/test',async(req,res)=>{
   res.status(201).send(req.body)
 })
-let tempData;
 stripeRouter.post('/create-checkout-session', async (req, res) => {
-  const customer = await stripe.customers.create({
-    metadata:{
-      userId:req.body.userId,
-    }
-  })
-  tempData=req.body.cartItems
   const line_items=req.body.cartItems.map((item)=>{
     return{
       price_data: {
@@ -62,37 +55,13 @@ stripeRouter.post('/create-checkout-session', async (req, res) => {
         enabled:true
       },
       line_items,
-      customer:customer.id,
       mode: 'payment',
       success_url: `${process.env.CLIENT_URL}/checkout-success`,
-      cancel_url: `${process.env.CLIENT_URL}/error`,
+      cancel_url: `${process.env.CLIENT_URL}/product`,
     });
   
     res.send(JSON.stringify({url:session.url}));
   });
-  const createOrder = async (customer, data) => {
-    var items = tempData
-    
-    try {
-    
-      const newOrder = new OrderModel({
-        userId: customer.metadata.userId,
-        customerId: data.customer,
-        paymentIntentId: data.payment_intent,
-        products:items,
-        subtotal: data.amount_subtotal/100,
-        total: data.amount_total/100,
-        shipping: data.customer_details,
-        payment_status: data.payment_status,
-        shipping_cost: data.shipping_cost.amount_total/100,
-        transaction_status: data.status,
-      });
-      const savedOrder = await newOrder.save();
-    } catch (err) {
-      console.log(err);
-    }
-  };
-
 //Stripe Webhook
 
 // This is your Stripe CLI webhook secret for testing your endpoint locally.
@@ -126,18 +95,16 @@ stripeRouter.post('/webhook', express.raw({type: 'application/json', verify: fal
   let payment
   // Handle the event
   if (eventType === "checkout.session.completed") {
-    stripe.customers
-      .retrieve(data.customer)
-      .then(async (customer) => {
-        try {
-          // CREATE ORDER
-          createOrder(customer, data);
-        } catch (err) {
-          console.log(typeof createOrder);
-          console.log(err);
-        }
-      })
-      .catch((err) => console.log(err.message));
+    try {
+        const session = await stripe.checkout.sessions.retrieve(data.id, {expand: ['payment_intent', 'line_items']});
+        const products = session.line_items.data.map(lineItem => ({
+            productId: lineItem.price.product.metadata.id,
+            quantity: lineItem.quantity
+          }));
+          console.log(products)
+    } catch (error) {
+        
+    }
   }
 
   // Return a 200 response to acknowledge receipt of the event
