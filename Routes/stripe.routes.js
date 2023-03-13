@@ -76,28 +76,28 @@ stripeRouter.post('/create-checkout-session', async (req, res) => {
  
   });
 
-  const createOrder = async (customer, data) => {
-    var items = tempData
+  // const createOrder = async (customer, data) => {
+  //   var items = tempData
     
-    try {
+  //   try {
     
-      const newOrder = new OrderModel({
-        userId: customer.metadata.userId,
-        customerId: data.customer,
-        paymentIntentId: data.payment_intent,
-        products:items,
-        subtotal: data.amount_subtotal/100,
-        total: data.amount_total/100,
-        shipping: data.customer_details,
-        payment_status: data.payment_status,
-        shipping_cost: data.shipping_cost.amount_total/100,
-        transaction_status: data.status,
-      });
-      const savedOrder = await newOrder.save();
-    } catch (err) {
-      console.log(err);
-    }
-  };
+  //     const newOrder = new OrderModel({
+  //       userId: customer.metadata.userId,
+  //       customerId: data.customer,
+  //       paymentIntentId: data.payment_intent,
+  //       products:items,
+  //       subtotal: data.amount_subtotal/100,
+  //       total: data.amount_total/100,
+  //       shipping: data.customer_details,
+  //       payment_status: data.payment_status,
+  //       shipping_cost: data.shipping_cost.amount_total/100,
+  //       transaction_status: data.status,
+  //     });
+  //     const savedOrder = await newOrder.save();
+  //   } catch (err) {
+  //     console.log(err);
+  //   }
+  // };
 
 //Stripe Webhook
 
@@ -140,27 +140,38 @@ stripeRouter.post('/webhooks', express.raw({type: 'application/json'}), async(re
         stripe.customers.retrieve(data.customer).then(async (customer) =>{
           try {
                       // CREATE ORDER
-                      createOrder(customer, data);
+                      var items = tempData
+                      const newOrder = new OrderModel({
+                        userId: customer.metadata.userId,
+                        customerId: data.customer,
+                        paymentIntentId: data.payment_intent,
+                        products:items,
+                        subtotal: data.amount_subtotal/100,
+                        total: data.amount_total/100,
+                        shipping: data.customer_details,
+                        payment_status: data.payment_status,
+                        shipping_cost: data.shipping_cost.amount_total/100,
+                        transaction_status: data.status,
+                      });
+                      const savedOrder = await newOrder.save();
+        res.status(200).send({ success: true, message: 'Order created successfully' });
                     } catch (err) {
-                      console.log(typeof createOrder);
                       console.log(err);
-                      res.status(400).send({'err1':err})
+                      res.status(400).send({'err2':err})
                     }
         }).catch((err)=>{
-          res.status(400).send({'err2':err})
+          res.status(400).send({'err3':err})
         })
       } catch (error) {
-        res.status(400).send({'err3':err})
+        res.status(400).send({'err4':err})
       }
     }
     
   } catch (error) {
     
-    res.send({error:error})
+    res.status(400).send({error:error})
   }
 
-
-  // Return a 200 response to acknowledge receipt of the event
 });
 
   module.exports ={
