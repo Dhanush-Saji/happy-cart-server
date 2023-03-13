@@ -132,18 +132,19 @@ stripeRouter.post('/webhook', express.raw({type: 'application/json'}), async(req
   let payment
   // Handle the event
   if (eventType === "checkout.session.completed") {
-    stripe.customers
-      .retrieve(data.customer)
-      .then(async (customer) => {
-        try {
-          // CREATE ORDER
-          createOrder(customer, data);
-        } catch (err) {
-          console.log(typeof createOrder);
-          console.log(err);
-        }
-      })
-      .catch((err) => console.log(err.message));
+    res.status(200).send({msg:'success'})
+    // stripe.customers
+    //   .retrieve(data.customer)
+    //   .then(async (customer) => {
+    //     try {
+    //       // CREATE ORDER
+    //       createOrder(customer, data);
+    //     } catch (err) {
+    //       console.log(typeof createOrder);
+    //       console.log(err);
+    //     }
+    //   })
+    //   .catch((err) => console.log(err.message));
   }
   if (event.type == 'payment_intent.payment_failed') {
 
