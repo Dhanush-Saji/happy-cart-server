@@ -9,6 +9,8 @@ const { cartRouter } = require('./Routes/cart.routes');
 const { orderRouter } = require('./Routes/order.routes');
 const bodyParser = require('body-parser');
 const { categoryRouter } = require('./Routes/category.routes');
+const { stripeRouter } = require('./Routes/stripe.routes');
+app.use('/stripe/webhook',bodyParser.raw({ type: '*/*' }));
 app.use(bodyParser.json({ limit: '50mb' }));
 app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
 
@@ -25,6 +27,9 @@ app.use('/product',productRouter)
 app.use('/cart',cartRouter)
 app.use('/orders',orderRouter)
 app.use('/category',categoryRouter)
+app.use('/stripe',stripeRouter)
+
+
 app.listen(PORT,async()=>{
     console.log(`Listening on http://localhost:${PORT}`)
     try {
